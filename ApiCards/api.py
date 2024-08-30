@@ -1,14 +1,22 @@
-from .Models.models import Card
-from .Models.User import User
+from .models.models import card
+from .models.user import user
+from .models.abilities import abilities
 from rest_framework import viewsets,permissions
-from .serializers import ApiCardsSerializer,ApiCardsSerializerUser
+from .serializer.cards import ApiCardsSerializer
+from .serializer.users import ApiCardsSerializerUser
+from .serializer.abilities import AbilitiesSerializar
 
 class ApiCardsViewSet(viewsets.ModelViewSet):
-    queryset = Card.objects.all()
+    queryset = card.objects.all()
     permissions_classes = [permissions.AllowAny]
     serializer_class = ApiCardsSerializer
 
 class ApiUserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = user.objects.all()
     permissions_classes = [permissions.AllowAny]
     serializer_class = ApiCardsSerializerUser
+
+class ApiAbilitiesViewSet(viewsets.ModelViewSet):
+    queryset = abilities.objects.all()
+    permissions_classes = [permissions.AllowAny]
+    serializer_class = AbilitiesSerializar
