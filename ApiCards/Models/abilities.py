@@ -1,5 +1,5 @@
 from django.db import models
-from .models import card
+from .card import card
 
 class abilities(models.Model):
     name = models.CharField(max_length=100)

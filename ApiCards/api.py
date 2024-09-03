@@ -1,4 +1,4 @@
-from .models.models import card
+from .models.card import card
 from .models.user import user
 from .models.abilities import abilities
 from rest_framework import viewsets,permissions
