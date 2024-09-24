@@ -1,17 +1,16 @@
+import os
 from functools import wraps
 from http import client
-from dotenv import environ
+from dotenv import load_dotenv
 
-
+load_dotenv()
 def set_token_middleware(view_func):
     @wraps(view_func)
     def _wrapped_view(request, *args, **kwargs):
-        env = environ.Env()
-        environ.Env.read_env()
-        CLIENT_ID = environ.get('CLIENT_ID')
-        CLIENT_SECRET = environ.get('CLIENT_SECRET')
-        REDIRECT_URL = environ.get('REDIRECT_URL')
-        DOMAIN = environ.get('DOMAIN')
+        CLIENT_ID = os.getenv('CLIENT_ID')
+        CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+        REDIRECT_URL = os.getenv('REDIRECT_URL')
+        DOMAIN = os.getenv('DOMAIN')
 
         code: str = str(request.GET.get('code'))
 

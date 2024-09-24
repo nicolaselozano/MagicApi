@@ -10,7 +10,7 @@ router.register(r'api/users',ApiUserViewSet,'users')
 router.register(r'api/abilities',ApiAbilitiesViewSet,'abilities')
 
 urlpatterns = [
-    path('api/user-manager/', UserManagerView.as_view(), name='user-manager'),
+    path(r'api/user-manager/', UserManagerView.as_view(), name='user-manager'),
 ]
 
 # Incluir las rutas registradas por el router

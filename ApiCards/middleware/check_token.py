@@ -1,33 +1,39 @@
 from functools import wraps
 import re
 import requests
-import jwt
 from django.http import HttpRequest
-from dotenv import environ
+from dotenv import load_dotenv
 from jwt import PyJWKClient, InvalidTokenError
+from rest_framework.response import Response
+from rest_framework import status
+import os
 
-env = environ.Env()
-environ.Env.read_env()
-CLIENT_ID = environ.get('CLIENT_ID')
-CLIENT_SECRET = environ.get('CLIENT_SECRET')
-REDIRECT_URL = environ.get('REDIRECT_URL')
-DOMAIN = environ.get('DOMAIN')
-AUDIENCE = environ.get('AUDIENCE')
-
+load_dotenv()
 
 def check_token(view_func):
+
     @wraps(view_func)
     def _wrapped_view(request: HttpRequest, *args, **kwargs):
         try:
+            CLIENT_ID = os.getenv('CLIENT_ID')
+            CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+            REDIRECT_URL = os.getenv('REDIRECT_URL')
+            DOMAIN = os.getenv('DOMAIN')
+            AUDIENCE = os.getenv('AUDIENCE')
+
             h_token = request.headers.get('Authorization')
+            if not h_token:
+                return Response({"error": "Authorization header missing"}, status=status.HTTP_401_UNAUTHORIZED)
+
             regex_bearer = re.compile(r"^[Bb]earer (.*)$")
+            match = regex_bearer.match(h_token)
 
-            existToken = regex_bearer.match(h_token)
+            if not match:
+                return Response({"error": "Invalid token format"}, status=status.HTTP_401_UNAUTHORIZED)
 
-            if existToken:
-                token = existToken.group(1)
+            token = match.group(1)
+
             jwks_client = get_signing_keys(DOMAIN)
-
             signing_key = jwks_client.get_signing_key_from_jwt(token)
 
             validation_options = {
@@ -43,15 +49,17 @@ def check_token(view_func):
                 audience=AUDIENCE,
                 options=validation_options
             )
-            print(f"El token es valido!")
-            return decoded_token
 
-        except InvalidTokenError as ex:
-            print(f"Token inválido: {ex}")
-            return None
-        except Exception as ex:
-            print(f"Error inesperado: {ex}")
-            return None
+            print(f"El token es válido!", decoded_token)
+            return view_func(request, *args, **kwargs)
+
+        except InvalidTokenError:
+            return Response({"error": "Invalid token"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        except Exception as e:
+            return Response({"error": f"Token validation error: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    return _wrapped_view
 
 
 def get_signing_keys(auth_domain):
